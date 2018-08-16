@@ -73,7 +73,7 @@
     }
 
     function rand() {
-      $.getJSON("http://127.0.0.1:5000/rand", function(r, status) {
+      $.getJSON("/rand", function(r, status) {
         if (r.error || status != "success") {
           console.log(r.word)
           console.log(r.error_msg)

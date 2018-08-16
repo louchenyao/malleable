@@ -7,6 +7,9 @@ import random
 import hashlib
 import time
 import json
+import os 
+
+BASE = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
 
@@ -115,17 +118,20 @@ def rand():
 def home():
     return render_template("home.html")
 
-def load():
+def load(txt):
+    p = os.path.join(BASE, "word_lists", txt)
+
     global word_list
     word_list = []
-    with open("word_list.txt", "r") as f:
+    with open(p, "r") as f:
         for w in f.readlines():
             if w:
                 word_list.append(w.strip())
     random.shuffle(word_list)
 
 
+load("word_list.txt")
+
 if __name__ == '__main__':
-    load()
     app.debug = True
     app.run()
