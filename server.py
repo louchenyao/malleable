@@ -24,10 +24,28 @@ def first_true(l, default=None):
             return i
     return default
 
-def query(word):
-    if word in cache:
-        return cache[word]
+def save_local(word, r):
+    with open("words/%s.json" % word, "w") as f:
+        f.write(json.dumps(r))
 
+def query_local(word):
+    with open("words/%s.json" % word) as f:
+        return json.loads(f.read())
+
+def query(word):
+    word = word.strip()
+    if word in cache:
+        print("query %s hit cache" % word)
+        return cache[word]
+    try:
+        r = query_local(word)
+        cache[word] = r
+        print("query %s hit local" % word)
+        return  r
+    except Exception:
+        pass
+
+    print("query %s thorugh Youdao API" % word)
     word = word.strip()
     salt = str(time.time())
     sign = appKey+word+salt+secretKey
@@ -49,12 +67,21 @@ def query(word):
     if int(t["errorCode"]) != 0:
         raise Exception(r.text)
     
+
+    if not t["query"] or "basic" not in t:
+        raise Exception("\"%s\" may be a wrong word" % word)
+    word = t["query"]
+
     res = {
         "word": t["query"],
         "phonetic": first_true([t["basic"].get("us-phonetic"), t["basic"].get("uk-phonetic"), t["basic"].get("phonetic")], ""),
         "explains": t["basic"]["explains"],
-        "speech_url": first_true([t["basic"].get("us-speech"), t["basic"].get("uk-speech"), t["basic"].get("speakUrl")], ""),
+        #"speech_url": first_true([t["basic"].get("us-speech"), t["basic"].get("uk-speech"), t["basic"].get("speakUrl")], ""),
+        "speech_url": "http://dict.youdao.com/dictvoice?audio="+word+"&type=2"
     }
+
+    cache[word] = res
+    save_local(word, res)
 
     return res
 

@@ -11,7 +11,7 @@ secretKey = 'jijsToUysU5C9YpZIx2mWbH7T8rdVO1O'
 
  
 myurl = '/api'
-q = 'abandon'
+q = 'Potpourri'
 fromLang = 'EN'
 toLang = 'zh-CHS'
 

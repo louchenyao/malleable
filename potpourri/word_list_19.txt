@@ -11,8 +11,7 @@ locate
 locomotion
 locomotive
 lodge
-lodge
-logical
+lodgelogical
 loose
 lounge
 lower
@@ -37,7 +36,7 @@ magnify
 magnitude
 maintain
 maintenance
-major
+marjor
 male
 mammal
 mammoth

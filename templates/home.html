@@ -42,6 +42,7 @@
             <h1 id="phonetic"></h1>
             <div id="explains"></div>
         </div>
+        <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
         <form action="javascript:submit()">
             <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off">
         </form>
@@ -66,6 +67,7 @@
         $("#explains").append("<p>"+l+"</p>")
       })
       $("#speech").attr("src", speech_url)
+      $("#cheat").attr("href", "http://youdao.com/w/eng/" + word)
       answer = word
       play()
     }
