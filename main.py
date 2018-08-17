@@ -80,7 +80,7 @@ def query(word):
         "phonetic": first_true([t["basic"].get("us-phonetic"), t["basic"].get("uk-phonetic"), t["basic"].get("phonetic")], ""),
         "explains": t["basic"]["explains"],
         #"speech_url": first_true([t["basic"].get("us-speech"), t["basic"].get("uk-speech"), t["basic"].get("speakUrl")], ""),
-        "speech_url": "http://dict.youdao.com/dictvoice?audio="+word+"&type=2"
+        "speech_url": "https://dict.youdao.com/dictvoice?audio="+word+"&type=2"
     }
 
     cache[word] = res
