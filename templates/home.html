@@ -63,12 +63,22 @@
   <script>
     let answer = "hackstring"
     let word_list = []
+    let word_p = 0
     
     $(function() {
       //rand()
       render_list_selector()
-      
+      //check()
     })
+    
+    function check() {
+      let inp = $("#word-input").val()
+      if (inp == answer) {
+        submit()
+      }
+
+      setTimeout(check, 100)
+    }
 
     function render_list_selector() {
       $.getJSON("/list_names", function(r, status) {
@@ -77,10 +87,13 @@
           console.log(r.error_msg)
           setTimeout(render_list_selector, 1000)
         } else {
-          let first = true
+          if (!getCookie("last_word_list") || r["lists"].indexOf(getCookie("last_word_list")) == -1) {
+            setCookie("last_word_list", r["lists"][0])
+          }
+
+          let last = getCookie("last_word_list")
           r["lists"].forEach(l => {
-            if (first) {
-              first = false
+            if (l == last) {
               $('#word_list_selector').append('<option value="' + l +'" selected>'+ l + '</option>');
               set_word_list(l)
             } else {
@@ -90,6 +103,7 @@
 
           $("#word_list_selector").change(function() {
             let l = $("#word_list_selector").val()
+            setCookie("last_word_list", l)
             set_word_list(l)
           });
         }
@@ -105,20 +119,27 @@
         } else {
           word_list = r["words"]
           word_list = shuffle(word_list)
-          rand_in_list()
+          next_word()
         }
       });
     }
-    function rand_in_list() {
-      let i = Math.floor(Math.random() * word_list.length);
-      let w = word_list[i]
+    function next_word() {
+      word_p = (word_p + 1) % word_list.length
+      let w = word_list[word_p]
       render(w.word, w.phonetic, w.explains, w.speech_url)
     }
+
+    function replace_word(l, word) {
+      let w = word[0].toUpperCase() + word.slice(1) // capitalise first letter
+      return l.replace(w, "xxx")
+    }
+
 
     function render(word, phonetic, explains, speech_url) {
       $("#phonetic").text(phonetic)
       $("#explains").html("")
       $.each(explains, function(_, l) {
+        l = replace_word(l, word)
         $("#explains").append("<p>"+l+"</p>")
       })
       $("#speech").attr("src", speech_url)
@@ -145,7 +166,7 @@
       let inp = $("#word-input").val()
       if (inp == answer) {
         $("#word-input").val("")
-        rand_in_list()
+        next_word()
       } else {
         play()
         $("#word-input").val("")
@@ -178,6 +199,30 @@
       }
 
       return array;
+    }
+
+    // cookie utilities from: https://stackoverflow.com/a/24103596
+    function setCookie(name,value,days) {
+      var expires = "";
+      if (days) {
+          var date = new Date();
+          date.setTime(date.getTime() + (days*24*60*60*1000));
+          expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+    function getCookie(name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for(var i=0;i < ca.length;i++) {
+          var c = ca[i];
+          while (c.charAt(0)==' ') c = c.substring(1,c.length);
+          if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+      }
+      return null;
+    }
+    function eraseCookie(name) {   
+      document.cookie = name+'=; Max-Age=-99999999;';  
     }
   </script>
 </html>
