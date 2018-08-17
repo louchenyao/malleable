@@ -38,7 +38,7 @@ def query_local(word):
 def query(word):
     word = word.strip()
     if word in cache:
-        print("query %s hit cache" % word)
+        #print("query %s hit cache" % word)
         return cache[word]
     try:
         r = query_local(word)
@@ -113,6 +113,43 @@ def rand():
             "error_msg": str(e)
         }
     return jsonify(r)
+    
+
+@app.route('/word_list')
+def download_word_list():
+    list_name = request.args.get('name')
+
+    r = {
+        "error": 0,
+        "words": []
+    }
+    try:
+        with open(os.path.join(BASE, "word_lists", list_name)) as f:
+            for w in f.readlines():
+                w = w.strip()
+                if w:
+                    r["words"].append(query(w))
+    except Exception as e:
+        r["error"] = 1
+        r["error_msg"] = str(e)
+    return jsonify(r)
+
+@app.route('/list_names')
+def list_names():
+    r = {
+        "error": 0,
+        "lists": []
+    }
+    try:
+        for l in os.listdir(os.path.join(BASE, "word_lists")):
+            if l.endswith(".txt"):
+                r["lists"].append(l)
+        r["lists"].sort()
+    except Exception as e:
+        r["error"] = 1
+        r["error_msg"] = str(e)
+
+    return jsonify(r)
 
 @app.route('/')
 def home():
@@ -130,7 +167,7 @@ def load(txt):
     random.shuffle(word_list)
 
 
-load("word_list.txt")
+load("word_list_19.txt")
 
 if __name__ == '__main__':
     app.debug = True

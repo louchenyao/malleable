@@ -36,6 +36,13 @@
   </head>
 
   <body>
+      <div class="input-group">
+          <div class="input-group-prepend">
+              <label class="input-group-text" for="word_list_selector">Word List</label>
+          </div>
+          <select class="custom-select" id="word_list_selector">
+          </select>
+      </div>
       <div class="card word-card text-center" style="width: 18rem;">
         <audio id="speech" type="audio/mp3" src=""></audio>
         <div class="word-display">
@@ -54,11 +61,59 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
   <script>
-    let answer = "hackstring";
+    let answer = "hackstring"
+    let word_list = []
     
     $(function() {
-      rand()
+      //rand()
+      render_list_selector()
+      
     })
+
+    function render_list_selector() {
+      $.getJSON("/list_names", function(r, status) {
+        if (r.error || status != "success") {
+          console.log("error in render_list_selector")
+          console.log(r.error_msg)
+          setTimeout(render_list_selector, 1000)
+        } else {
+          let first = true
+          r["lists"].forEach(l => {
+            if (first) {
+              first = false
+              $('#word_list_selector').append('<option value="' + l +'" selected>'+ l + '</option>');
+              set_word_list(l)
+            } else {
+              $('#word_list_selector').append('<option value="' + l +'">'+ l + '</option>');
+            }
+          });
+
+          $("#word_list_selector").change(function() {
+            let l = $("#word_list_selector").val()
+            set_word_list(l)
+          });
+        }
+      });
+    }
+
+    function set_word_list(l) {
+      $.getJSON("/word_list?name=" + l, function(r, status) {
+        if (r.error || status != "success") {
+          console.log("error in set_word_list")
+          console.log(r.error_msg)
+          alert("Please refresh the page.")
+        } else {
+          word_list = r["words"]
+          word_list = shuffle(word_list)
+          rand_in_list()
+        }
+      });
+    }
+    function rand_in_list() {
+      let i = Math.floor(Math.random() * word_list.length);
+      let w = word_list[i]
+      render(w.word, w.phonetic, w.explains, w.speech_url)
+    }
 
     function render(word, phonetic, explains, speech_url) {
       $("#phonetic").text(phonetic)
@@ -90,7 +145,7 @@
       let inp = $("#word-input").val()
       if (inp == answer) {
         $("#word-input").val("")
-        rand()
+        rand_in_list()
       } else {
         play()
         $("#word-input").val("")
@@ -102,6 +157,27 @@
       let a = $("#speech")[0]
       a.currentTime = 0;
       a.play();
+    }
+
+    // code from: https://stackoverflow.com/a/6274398
+    function shuffle(array) {
+      let counter = array.length;
+
+      // While there are elements in the array
+      while (counter > 0) {
+          // Pick a random index
+          let index = Math.floor(Math.random() * counter);
+
+          // Decrease counter by 1
+          counter--;
+
+          // And swap the last element with it
+          let temp = array[counter];
+          array[counter] = array[index];
+          array[index] = temp;
+      }
+
+      return array;
     }
   </script>
 </html>
