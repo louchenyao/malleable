@@ -18,7 +18,7 @@ appKey = '748dd544372b4354'
 secretKey = 'jijsToUysU5C9YpZIx2mWbH7T8rdVO1O'
 
 cache = {}
-word_list = ["abandon"]
+word_list = ["abandon", "good", "bad"]
 word_p = 0
 
 def first_true(l, default=None):
@@ -166,8 +166,6 @@ def load(txt):
                 word_list.append(w.strip())
     random.shuffle(word_list)
 
-
-load("word_list_19.txt")
 
 if __name__ == '__main__':
     app.debug = True
