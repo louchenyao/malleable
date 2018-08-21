@@ -32,6 +32,10 @@
         margin: auto;
       }
 
+      .partofspeech{
+        color: #3EB3C0;
+      }
+
     </style>
   </head>
 
@@ -135,11 +139,22 @@
     }
 
 
+    function mark_part_of_speech(l){
+      l=l.replace(/^n\./,'<em class="partofspeech">n.</em>')
+      l=l.replace(/^adj\./,'<em class="partofspeech">adj.</em>')
+      l=l.replace(/^vi\./,'<em class="partofspeech">vi.</em>')
+      l=l.replace(/^vt\./,'<em class="partofspeech">vt.</em>')
+      l=l.replace(/^v\./,'<em class="partofspeech">v.</em>')
+      l=l.replace(/^int\./,'<em class="partofspeech">int.</em>')
+      return l
+    }
+
     function render(word, phonetic, explains, speech_url) {
       $("#phonetic").text(phonetic)
       $("#explains").html("")
       $.each(explains, function(_, l) {
         l = replace_word(l, word)
+        l = mark_part_of_speech(l)
         $("#explains").append("<p>"+l+"</p>")
       })
       $("#speech").attr("src", speech_url)
