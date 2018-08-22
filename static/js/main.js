@@ -34,6 +34,7 @@ function set_show_label_on() {
 
   $("#show-label").addClass("btn-outline-primary")
   $("#show-label").text("Label: On")
+  $("#word-label").show()
   localStorage.setItem("show-label", "on")
 }
 
@@ -43,7 +44,7 @@ function set_show_label_off() {
 
   $("#show-label").addClass("btn-outline-secondary")
   $("#show-label").text("Label: Off")
-  $("#word-label").text("")
+  $("#word-label").hide()
   localStorage.setItem("show-label", "off")
 }
 
@@ -53,10 +54,10 @@ function load_config() {
   } else {
     set_auto_submit_off()
   }
-  if (localStorage.getItem("show-label") === "on") {
-    set_show_label_on()
-  } else {
+  if (localStorage.getItem("show-label") === "off") { // defalut open
     set_show_label_off()
+  } else {
+    set_show_label_on()
   }
 }
 
@@ -155,22 +156,25 @@ function mark_part_of_speech(l){
   return l
 }
 
-function render_label(word){
-  if (localStorage.getItem("show-label") !== "on"){
-    return
-  }
-  known_words = localStorage.getItem("known-words") || "{}"
-  known_words = JSON.parse(known_words)
-  times = 0
-  if(word in known_words){
-    known_words[word]+=1
-    times = known_words[word]
-  }else{
-    known_words[word]=1
-    times = 1
-  }
-  localStorage.setItem("known-words",JSON.stringify(known_words))
-  $("#word-label").text(times+"x")
+function add_word_count(word, delta) {
+    known_words = localStorage.getItem("known-words") || "{}"
+    known_words = JSON.parse(known_words)
+    if (!known_words[word]) { // word does not exist in known_words
+        known_words[word] = delta
+    } else {
+        known_words[word] += delta
+    }
+    localStorage.setItem("known-words",JSON.stringify(known_words))
+}
+
+function get_word_count(word) {
+    known_words = localStorage.getItem("known-words") || "{}"
+    known_words = JSON.parse(known_words)
+    if (!known_words[word]) { // word does not exist in known_words
+        return 0
+    } else {
+        return known_words[word]
+    }
 }
 
 function render(word, phonetic, explains, speech_url) {
@@ -183,7 +187,7 @@ function render(word, phonetic, explains, speech_url) {
   })
   $("#speech").attr("src", speech_url)
   $("#cheat").attr("href", "https://dict.youdao.com/w/eng/" + word)
-  render_label(word)
+  $("#word-label").text(get_word_count(word)+"x")
   answer = word
   play()
 }
@@ -207,6 +211,7 @@ function submit() {
   if (inp == answer) {
     $("#word-input").val("")
     $("#word-input").removeClass("word-success")
+    add_word_count(answer, 1)
     next_word()
   } else {
     play()
