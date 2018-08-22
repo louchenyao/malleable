@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="/static/icon3.png">
+    <link rel="icon" href="/static/icon4.png">
 
     <title>Malleable</title>
 
@@ -14,24 +14,56 @@
     
     <!-- Custom styles for this template -->
     <style>
-      .word-card {
-        min-width: 360px;
-        max-width: 360px;
-        min-height: 400px;
-        margin: auto;
-        margin-top: 16%;
-        padding: 10px;
+      body{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display:flex;
+        align-items:center;
+        justify-content: center;
       }
 
-      .word-display {
-        min-height: 300px;
+      .word-card {
+        width: 360px;
+        height: 400px;
+        z-index:1;
+        padding-top:20px;
       }
+
       
       .word-input {
         width: 170px;
         margin: auto;
       }
 
+      .partofspeech{
+        color: #3EB3C0;
+      }
+
+      .input-group{
+        position: fixed;
+        top:0;
+      }
+
+      .bottombar{
+        position: absolute;
+        bottom: 30px;
+        width:100%;
+      }
+
+      #phonetic{
+        margin: 10px;
+      }
+
+      .word-success{
+        color: #49574b !important; 
+        background-color: #fff !important;
+        border-color: #a6f7a8 !important;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(107, 204, 119, 0.23) !important;
+      }
     </style>
   </head>
 
@@ -43,16 +75,18 @@
           <select class="custom-select" id="word_list_selector">
           </select>
       </div>
-      <div class="card word-card text-center" style="width: 18rem;">
+      <div class="card word-card text-center">
         <audio id="speech" type="audio/mp3" src=""></audio>
         <div class="word-display">
             <h1 id="phonetic"></h1>
             <div id="explains"></div>
         </div>
-        <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
-        <form action="javascript:submit()">
-            <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off">
-        </form>
+        <div class="bottombar">
+          <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
+          <form action="javascript:submit()">
+              <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off" oninput="inputCheck()">
+          </form>
+        </div>
       </div>
   </body>
 
@@ -71,6 +105,15 @@
       //check()
     })
     
+    function inputCheck(){
+      let inp = $("#word-input").val()
+      if (inp == answer) {
+        $("#word-input").addClass("word-success")
+      }else{
+        $("#word-input").removeClass("word-success")
+      }
+    }
+
     function check() {
       let inp = $("#word-input").val()
       if (inp == answer) {
@@ -135,11 +178,23 @@
     }
 
 
+    function mark_part_of_speech(l){
+      l=l.replace(/^n\./,'<em class="partofspeech">n.</em>')
+      l=l.replace(/^adj\./,'<em class="partofspeech">adj.</em>')
+      l=l.replace(/^vi\./,'<em class="partofspeech">vi.</em>')
+      l=l.replace(/^vt\./,'<em class="partofspeech">vt.</em>')
+      l=l.replace(/^v\./,'<em class="partofspeech">v.</em>')
+      l=l.replace(/^int\./,'<em class="partofspeech">int.</em>')
+      l=l.replace(/^adv\./,'<em class="partofspeech">adv.</em>')
+      return l
+    }
+
     function render(word, phonetic, explains, speech_url) {
       $("#phonetic").text(phonetic)
       $("#explains").html("")
       $.each(explains, function(_, l) {
         l = replace_word(l, word)
+        l = mark_part_of_speech(l)
         $("#explains").append("<p>"+l+"</p>")
       })
       $("#speech").attr("src", speech_url)
@@ -166,10 +221,12 @@
       let inp = $("#word-input").val()
       if (inp == answer) {
         $("#word-input").val("")
+        $("#word-input").removeClass("word-success")
         next_word()
       } else {
         play()
         $("#word-input").val("")
+        $("#word-input").removeClass("word-success")
         $("#word-input").focus()
       }
     }
