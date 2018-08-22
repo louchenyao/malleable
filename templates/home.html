@@ -14,18 +14,24 @@
     
     <!-- Custom styles for this template -->
     <style>
-      .word-card {
-        min-width: 360px;
-        max-width: 360px;
-        min-height: 400px;
-        margin: auto;
-        margin-top: 16%;
-        padding: 10px;
+      body{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display:flex;
+        align-items:center;
+        justify-content: center;
       }
 
-      .word-display {
-        min-height: 300px;
+      .word-card {
+        width: 360px;
+        height: 400px;
+        z-index:1;
+        padding-top:20px;
       }
+
       
       .word-input {
         width: 170px;
@@ -36,6 +42,20 @@
         color: #3EB3C0;
       }
 
+      .input-group{
+        position: fixed;
+        top:0;
+      }
+
+      .bottombar{
+        position: absolute;
+        bottom: 30px;
+        width:100%;
+      }
+
+      #phonetic{
+        margin: 10px;
+      }
     </style>
   </head>
 
@@ -47,16 +67,18 @@
           <select class="custom-select" id="word_list_selector">
           </select>
       </div>
-      <div class="card word-card text-center" style="width: 18rem;">
+      <div class="card word-card text-center">
         <audio id="speech" type="audio/mp3" src=""></audio>
         <div class="word-display">
             <h1 id="phonetic"></h1>
             <div id="explains"></div>
         </div>
-        <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
-        <form action="javascript:submit()">
-            <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off">
-        </form>
+        <div class="bottombar">
+          <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
+          <form action="javascript:submit()">
+              <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off">
+          </form>
+        </div>
       </div>
   </body>
 
