@@ -6,7 +6,7 @@ journal
 juice
 jumble
 junction
-Jupiter
+jupiter
 justice
 justify
 juvenile
@@ -28,7 +28,7 @@ laser
 lash
 lasting
 latent
-Latin
+latin
 latitude
 latter
 launch
@@ -47,7 +47,7 @@ lease
 leather
 ledge
 leftover
-legent
+legend
 legible
 legislation
 legislature
