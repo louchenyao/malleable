@@ -55,6 +55,7 @@
 
       #phonetic{
         margin: 10px;
+        margin-top:-10px;
       }
 
       .word-success{
@@ -63,6 +64,13 @@
         border-color: #a6f7a8 !important;
         outline: 0;
         box-shadow: 0 0 0 0.2rem rgba(107, 204, 119, 0.23) !important;
+      }
+
+      .word-label{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        height: 20px;
       }
 
       #explains{
@@ -83,9 +91,13 @@
           <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#config-modal"> Lab</button>
       </div>
       <div class="card word-card text-center">
+
         <audio id="speech" type="audio/mp3" src=""></audio>
         <div class="word-display">
-            <h1 id="phonetic"></h1>
+            <div class="word-label">
+              <inline class="badge badge-primary" id="word-label"></inline>
+            </div>
+            <h1 id="phonetic"> </h1>
             <div id="explains"></div>
         </div>
         <div class="bottombar">
@@ -95,6 +107,8 @@
           </form>
         </div>
       </div>
+      <br/>
+      
 
 
     <!-- laboratory -->
@@ -109,6 +123,8 @@
           </div>
           <div class="modal-body" id="config-modal">
             <p><button type="button" id="auto-submit" class="btn btn-outline-secondary" onclick="auto_sumbit_switch()">Auto Submit: Off</button></p>
+            <p><button type="button" id="show-label" class="btn btn-outline-secondary" onclick="show_label_switch()">Label: Off</button></p>
+            <p><button type="button" id="show-label" class="btn btn-outline-danger" onclick="localStorage.setItem('known-words','')">Clean Known Words</button></p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -153,11 +169,36 @@
       localStorage.setItem("auto-submit", "off")
     }
 
+
+    function set_show_label_on() {
+      $("#show-label").removeClass("btn-outline-primary")
+      $("#show-label").removeClass("btn-outline-secondary")
+
+      $("#show-label").addClass("btn-outline-primary")
+      $("#show-label").text("Label: On")
+      localStorage.setItem("show-label", "on")
+    }
+
+    function set_show_label_off() {
+      $("#show-label").removeClass("btn-outline-primary")
+      $("#show-label").removeClass("btn-outline-secondary")
+
+      $("#show-label").addClass("btn-outline-secondary")
+      $("#show-label").text("Label: Off")
+      $("#word-label").text("")
+      localStorage.setItem("show-label", "off")
+    }
+
     function load_config() {
       if (localStorage.getItem("auto-submit") === "on") {
         set_auto_submit_on()
       } else {
         set_auto_submit_off()
+      }
+      if (localStorage.getItem("show-label") === "on") {
+        set_show_label_on()
+      } else {
+        set_show_label_off()
       }
     }
 
@@ -166,6 +207,14 @@
         set_auto_submit_off()
       } else {
         set_auto_submit_on()
+      }
+    }
+    
+    function show_label_switch() {
+      if (localStorage.getItem("show-label") === "on") {
+        set_show_label_off()
+      } else {
+        set_show_label_on()
       }
     }
     
@@ -248,6 +297,24 @@
       return l
     }
 
+    function render_label(word){
+      if (localStorage.getItem("show-label") !== "on"){
+        return
+      }
+      known_words = localStorage.getItem("known-words") || "{}"
+      known_words = JSON.parse(known_words)
+      times = 0
+      if(word in known_words){
+        known_words[word]+=1
+        times = known_words[word]
+      }else{
+        known_words[word]=1
+        times = 1
+      }
+      localStorage.setItem("known-words",JSON.stringify(known_words))
+      $("#word-label").text(times+"x")
+    }
+
     function render(word, phonetic, explains, speech_url) {
       $("#phonetic").text(phonetic)
       $("#explains").html("")
@@ -258,6 +325,7 @@
       })
       $("#speech").attr("src", speech_url)
       $("#cheat").attr("href", "https://dict.youdao.com/w/eng/" + word)
+      render_label(word)
       answer = word
       play()
     }
