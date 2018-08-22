@@ -80,6 +80,7 @@
           </div>
           <select class="custom-select" id="word_list_selector">
           </select>
+          <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#config-modal"> Lab</button>
       </div>
       <div class="card word-card text-center">
         <audio id="speech" type="audio/mp3" src=""></audio>
@@ -94,6 +95,34 @@
           </form>
         </div>
       </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="config-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Wow.. You Found Me!</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="config-modal">
+            <p><button type="button" class="btn btn-outline-primary" onclick="localStorage.setItem('auto-submit','yes')">Auto Submit</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="localStorage.setItem('auto-submit','no')">Disable Auto Submit</button></p>
+            <hr>
+            <h5>Current config</h5>
+            <p>Auto Submit: <span id="config-auto-submit">please refresh</span></p>
+            <p>...</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-success" onclick="refreshConfig()">Refresh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+          
   </body>
 
   <script src="/static/third_party/jquery-3.3.1.min.js"></script>
@@ -101,6 +130,9 @@
   <script src="/static/third_party/bootstrap-4.1.3.min.js"></script>
 
   <script>
+    function refreshConfig(){
+      $("#config-auto-submit").text(localStorage.getItem("auto-submit"))
+    }
     let answer = "hackstring"
     let word_list = []
     let word_p = 0
@@ -115,19 +147,14 @@
       let inp = $("#word-input").val()
       if (inp == answer) {
         $("#word-input").addClass("word-success")
+        if (localStorage.getItem("auto-submit") === "yes" ){
+          setTimeout("submit()",250)
+        }
       }else{
         $("#word-input").removeClass("word-success")
       }
     }
 
-    function check() {
-      let inp = $("#word-input").val()
-      if (inp == answer) {
-        submit()
-      }
-
-      setTimeout(check, 100)
-    }
 
     function render_list_selector() {
       $.getJSON("/list_names", function(r, status) {
