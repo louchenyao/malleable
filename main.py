@@ -8,6 +8,8 @@ import hashlib
 import time
 import json
 import os 
+import sys
+import _thread
 
 BASE = os.path.dirname(os.path.realpath(__file__))
 
@@ -18,6 +20,38 @@ appKey = '748dd544372b4354'
 secretKey = 'jijsToUysU5C9YpZIx2mWbH7T8rdVO1O'
 
 cache = {}
+loaded = False
+updated = False
+
+def set_cache(k, v):
+    global updated
+    cache[k] = v
+    updated = True
+
+def load_cache():
+    global cache, loaded
+    with open(os.path.join(BASE, "words", "db.json")) as f:
+        cache = json.loads(f.read())
+    loaded = True
+
+def dump_cache():
+    global updated
+    with open(os.path.join(BASE, "words", "db.json"), "w") as f:
+        f.write(json.dumps(cache))
+    updated = False
+
+def cache_watchdog():
+    # It may occurs race condition in multi-process situation.
+    # But in production environment, we already cached all words.
+    # It only runs in devloping stage.
+    while True:
+        time.sleep(1)
+        if loaded and updated:
+            try:
+                dump_cache()
+            except Exception as e:
+                print(str(e), file=sys.stderr)
+
 word_list = ["abandon", "good", "bad"]
 word_p = 0
 
@@ -27,26 +61,19 @@ def first_true(l, default=None):
             return i
     return default
 
-def save_local(word, r):
-    with open("words/%s.json" % word, "w") as f:
-        f.write(json.dumps(r))
+# def save_local(word, r):
+#     with open("words/%s.json" % word, "w") as f:
+#         f.write(json.dumps(r))
 
-def query_local(word):
-    with open("words/%s.json" % word) as f:
-        return json.loads(f.read())
+# def query_local(word):
+#     with open("words/%s.json" % word) as f:
+#         return json.loads(f.read())
 
 def query(word):
     word = word.strip()
     if word in cache:
         #print("query %s hit cache" % word)
         return cache[word]
-    try:
-        r = query_local(word)
-        cache[word] = r
-        print("query %s hit local" % word)
-        return  r
-    except Exception:
-        pass
 
     print("query %s thorugh Youdao API" % word)
     word = word.strip()
@@ -83,8 +110,7 @@ def query(word):
         "speech_url": "https://dict.youdao.com/dictvoice?audio="+word+"&type=2"
     }
 
-    cache[word] = res
-    save_local(word, res)
+    set_cache(word, res)
 
     return res
 
@@ -166,7 +192,9 @@ def load(txt):
                 word_list.append(w.strip())
     random.shuffle(word_list)
 
+load_cache()
 
 if __name__ == '__main__':
+    _thread.start_new_thread(cache_watchdog, ())
     app.debug = True
     app.run()
