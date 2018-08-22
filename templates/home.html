@@ -56,6 +56,14 @@
       #phonetic{
         margin: 10px;
       }
+
+      .word-success{
+        color: #49574b !important; 
+        background-color: #fff !important;
+        border-color: #a6f7a8 !important;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(107, 204, 119, 0.23) !important;
+      }
     </style>
   </head>
 
@@ -76,7 +84,7 @@
         <div class="bottombar">
           <p><a href="" id="cheat" target="_blank">Cheat Link</a></p>
           <form action="javascript:submit()">
-              <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off">
+              <input type="text" class="form-control word-input input-success" id="word-input" placeholder="Enter the word" autofocus autocomplete="off" oninput="inputCheck()">
           </form>
         </div>
       </div>
@@ -97,6 +105,15 @@
       //check()
     })
     
+    function inputCheck(){
+      let inp = $("#word-input").val()
+      if (inp == answer) {
+        $("#word-input").addClass("word-success")
+      }else{
+        $("#word-input").removeClass("word-success")
+      }
+    }
+
     function check() {
       let inp = $("#word-input").val()
       if (inp == answer) {
@@ -204,10 +221,12 @@
       let inp = $("#word-input").val()
       if (inp == answer) {
         $("#word-input").val("")
+        $("#word-input").removeClass("word-success")
         next_word()
       } else {
         play()
         $("#word-input").val("")
+        $("#word-input").removeClass("word-success")
         $("#word-input").focus()
       }
     }
