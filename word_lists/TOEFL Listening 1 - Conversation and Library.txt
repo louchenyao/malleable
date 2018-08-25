@@ -1,0 +1,33 @@
+orientation
+freshman    
+exchange
+transfer
+librarian
+criteria
+section
+stack
+shelf
+shelve
+check out
+loan
+period
+due
+fine
+suspend
+borrowing
+privilege
+reserve
+database
+journal
+review
+summary
+abstract
+photocopy
+photocopier
+electronic
+format
+laptop
+plug in
+hook up
+fund
+refund
