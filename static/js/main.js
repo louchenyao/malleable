@@ -186,7 +186,7 @@ function render(word, phonetic, explains, speech_url) {
     $("#explains").append("<p>"+l+"</p>")
   })
   $("#speech").attr("src", speech_url)
-  $("#youdao").attr("href", "https://dict.youdao.com/w/eng/" + word)
+  $("#cheat").attr("href", "https://dict.youdao.com/w/eng/" + word) // Youdao It!
   $("#word-label").text(get_word_count(word)+"x")
   answer = word
   play()
