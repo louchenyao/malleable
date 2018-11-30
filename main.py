@@ -1,14 +1,18 @@
 #/usr/bin/env python3
 
-from flask import Flask, jsonify, request, render_template
+import hashlib
+import http.server
+import json
+import os
+import random
+import shutil
+import socketserver
+import sys
+import time
 
 import requests
-import random
-import hashlib
-import time
-import json
-import os 
-import sys
+from flask import Flask, jsonify, render_template, request
+
 import _thread
 
 BASE = os.path.dirname(os.path.realpath(__file__))
@@ -52,22 +56,11 @@ def cache_watchdog():
             except Exception as e:
                 print(str(e), file=sys.stderr)
 
-word_list = ["abandon", "good", "bad"]
-word_p = 0
-
 def first_true(l, default=None):
     for i in l:
         if i:
             return i
     return default
-
-# def save_local(word, r):
-#     with open("words/%s.json" % word, "w") as f:
-#         f.write(json.dumps(r))
-
-# def query_local(word):
-#     with open("words/%s.json" % word) as f:
-#         return json.loads(f.read())
 
 def query(word):
     word = word.strip()
@@ -114,36 +107,8 @@ def query(word):
 
     return res
 
-@app.route('/rand')
-def rand():
-    # r = {
-    #     "word": "good",
-    #     "phonetic": "ɡʊd",
-    #     "explains": ["adj. 好的；优良的；愉快的；虔诚的"],
-    #     "speech_url": "http://openapi.youdao.com/ttsapi?q=good&langType=en&sign=337F61B28F0C70CD525038096944807F&salt=1534249304847&voice=6&format=mp3&appKey=748dd544372b4354",
-    # }
-    global word_p
-    if word_p + 1 >= len(word_list):
-        word_p = 0
-    else:
-        word_p += 1
-    w = word_list[word_p]
 
-    try:
-        r = query(w)
-        r["error"] = 0
-    except Exception as e:
-        r = {
-            "word": w,
-            "error": 1,
-            "error_msg": str(e)
-        }
-    return jsonify(r)
-    
-
-@app.route('/word_list')
-def download_word_list():
-    list_name = request.args.get('name')
+def gen_wordlist(list_name):
 
     r = {
         "error": 0,
@@ -158,9 +123,10 @@ def download_word_list():
     except Exception as e:
         r["error"] = 1
         r["error_msg"] = str(e)
-    return jsonify(r)
+    
+    return r
 
-@app.route('/list_names')
+
 def list_names():
     r = {
         "error": 0,
@@ -175,11 +141,7 @@ def list_names():
         r["error"] = 1
         r["error_msg"] = str(e)
 
-    return jsonify(r)
-
-@app.route('/')
-def home():
-    return render_template("home.html")
+    return r
 
 def load(txt):
     p = os.path.join(BASE, "word_lists", txt)
@@ -194,7 +156,29 @@ def load(txt):
 
 load_cache()
 
+def serve(path):
+    os.chdir(path)
+    Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("127.0.0.1", 5000), Handler)
+    print("serving at ", "http://127.0.0.1:5000")
+    httpd.serve_forever()
+
+def gen_public():
+    os.system("rm -rf ./public")
+    os.system("mkdir -p ./public ./public/word_lists")
+    shutil.copytree("./static", "./public/static")
+    shutil.copy("./templates/home.html", "./public/index.html")
+    word_list_index = list_names()
+    with open("./public/word_list_index.json", "w") as f:
+        f.write(json.dumps(word_list_index))
+    for name in word_list_index["lists"]:
+        with open("./public/word_lists/%s" % name, "w") as f:
+            l = gen_wordlist(name)
+            if l["error"]:
+                raise Exception("Occured error during generating %s: %s" % (name, l["error_msg"]))
+            f.write(json.dumps(l))
+
 if __name__ == '__main__':
     _thread.start_new_thread(cache_watchdog, ())
-    app.debug = True
-    app.run()
+    gen_public()
+    serve("./public")

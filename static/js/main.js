@@ -91,7 +91,7 @@ function inputCheck(){
 
 
 function render_list_selector() {
-  $.getJSON("/list_names", function(r, status) {
+  $.getJSON("/word_list_index.json", function(r, status) {
     if (r.error || status != "success") {
       console.log("error in render_list_selector")
       console.log(r.error_msg)
@@ -121,7 +121,7 @@ function render_list_selector() {
 }
 
 function set_word_list(l) {
-  $.getJSON("/word_list?name=" + l, function(r, status) {
+  $.getJSON("/word_lists/" + l, function(r, status) {
     if (r.error || status != "success") {
       console.log("error in set_word_list")
       console.log(r.error_msg)
